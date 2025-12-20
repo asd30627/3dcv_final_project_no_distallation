@@ -1,0 +1,6 @@
+# ninja log v7
+0	1570	1763450880131589003	/home/ivlab3/GaussianFormer/model/head/localagg/build/temp.linux-x86_64-cpython-39/src/backward.o	554c5c2177830479
+1	1583	1763450880131673105	/home/ivlab3/GaussianFormer/model/head/localagg/build/temp.linux-x86_64-cpython-39/src/forward.o	b653691c986fa6d5
+0	8718	1763450880129811665	/home/ivlab3/GaussianFormer/model/head/localagg/build/temp.linux-x86_64-cpython-39/ext.o	34c3cbc2e653e370
+0	21514	1763450880131261308	/home/ivlab3/GaussianFormer/model/head/localagg/build/temp.linux-x86_64-cpython-39/local_aggregate.o	3788df3415b4e619
+0	26176	1763450880131448009	/home/ivlab3/GaussianFormer/model/head/localagg/build/temp.linux-x86_64-cpython-39/src/aggregator_impl.o	4b7ce21ea2ba0ef6

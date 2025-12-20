@@ -1,0 +1,3762 @@
+2025/12/03 22:37:18 - mmengine - INFO - Config:
+anno_root = 'data/nuscenes_cam/'
+batch_size = 1
+data_aug_conf = dict(
+    H=900,
+    W=1600,
+    bot_pct_lim=(
+        0.0,
+        0.0,
+    ),
+    final_dim=(
+        864,
+        1600,
+    ),
+    rand_flip=True,
+    resize_lim=(
+        1.0,
+        1.0,
+    ),
+    rot_lim=(
+        0.0,
+        0.0,
+    ))
+data_root = 'data/nuscenes/'
+drop_out = 0.1
+embed_dims = 128
+grad_max_norm = 35
+img_norm_cfg = dict(
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    to_rgb=True)
+include_opa = True
+input_shape = (
+    1600,
+    864,
+)
+load_from = 'ckpts/r101_dcn_fcos3d_pretrain.pth'
+loss = dict(
+    loss_cfgs=[
+        dict(
+            balance_cls_weight=True,
+            empty_label=17,
+            ignore_empty=False,
+            lovasz_ignore=17,
+            lovasz_use_softmax=False,
+            manual_class_weight=[
+                1.01552756,
+                1.06897009,
+                1.30013094,
+                1.07253735,
+                0.94637502,
+                1.10087012,
+                1.26960524,
+                1.06258364,
+                1.189019,
+                1.06217292,
+                1.00595144,
+                0.85706115,
+                1.03923299,
+                0.90867526,
+                0.8936431,
+                0.85486129,
+                0.8527829,
+                0.5,
+            ],
+            multi_loss_weights=dict(
+                loss_voxel_ce_weight=10.0, loss_voxel_lovasz_weight=1.0),
+            num_classes=18,
+            type='OccupancyLoss',
+            use_dice_loss=False,
+            use_focal_loss=False,
+            use_lovasz_loss=True,
+            use_sem_geo_scal_loss=False,
+            weight=1.0),
+        dict(type='PixelDistributionLoss', use_sigmoid=False, weight=1.0),
+    ],
+    type='MultiLoss')
+loss_input_convertion = dict(
+    bin_logits='bin_logits',
+    density='density',
+    occ_mask='occ_mask',
+    pixel_gt='pixel_gt',
+    pixel_logits='pixel_logits',
+    pred_occ='pred_occ',
+    sampled_label='sampled_label',
+    sampled_xyz='sampled_xyz')
+max_epochs = 12
+model = dict(
+    encoder=dict(
+        anchor_encoder=dict(
+            embed_dims=128,
+            include_opa=True,
+            semantic_dim=17,
+            semantics=True,
+            type='SparseGaussian3DEncoder'),
+        deformable_model=dict(
+            attn_drop=0.15,
+            embed_dims=128,
+            kps_generator=dict(
+                embed_dims=128,
+                fix_scale=[
+                    [
+                        0,
+                        0,
+                        0,
+                    ],
+                    [
+                        0.45,
+                        0,
+                        0,
+                    ],
+                    [
+                        -0.45,
+                        0,
+                        0,
+                    ],
+                    [
+                        0,
+                        0.45,
+                        0,
+                    ],
+                    [
+                        0,
+                        -0.45,
+                        0,
+                    ],
+                    [
+                        0,
+                        0,
+                        0.45,
+                    ],
+                    [
+                        0,
+                        0,
+                        -0.45,
+                    ],
+                ],
+                learnable_fixed_scale=6.0,
+                num_learnable_pts=6,
+                pc_range=[
+                    -50.0,
+                    -50.0,
+                    -5.0,
+                    50.0,
+                    50.0,
+                    3.0,
+                ],
+                phi_activation='sigmoid',
+                scale_range=[
+                    0.01,
+                    3.2,
+                ],
+                type='SparseGaussian3DKeyPointsGenerator',
+                xyz_coordinate='cartesian'),
+            num_cams=6,
+            num_groups=4,
+            num_levels=4,
+            residual_mode='none',
+            type='DeformableFeatureAggregation',
+            use_camera_embed=True,
+            use_deformable_func=True),
+        ffn=dict(
+            add_identity=False,
+            embed_dims=128,
+            feedforward_channels=512,
+            ffn_drop=0.1,
+            in_channels=128,
+            type='AsymmetricFFN'),
+        norm_layer=dict(normalized_shape=128, type='LN'),
+        num_decoder=4,
+        num_single_frame_decoder=1,
+        operation_order=[
+            'identity',
+            'deformable',
+            'add',
+            'norm',
+            'identity',
+            'ffn',
+            'add',
+            'norm',
+            'identity',
+            'spconv',
+            'add',
+            'norm',
+            'identity',
+            'ffn',
+            'add',
+            'norm',
+            'refine',
+            'identity',
+            'deformable',
+            'add',
+            'norm',
+            'identity',
+            'ffn',
+            'add',
+            'norm',
+            'identity',
+            'spconv',
+            'add',
+            'norm',
+            'identity',
+            'ffn',
+            'add',
+            'norm',
+            'refine',
+            'identity',
+            'deformable',
+            'add',
+            'norm',
+            'identity',
+            'ffn',
+            'add',
+            'norm',
+            'identity',
+            'spconv',
+            'add',
+            'norm',
+            'identity',
+            'ffn',
+            'add',
+            'norm',
+            'refine',
+            'identity',
+            'deformable',
+            'add',
+            'norm',
+            'identity',
+            'ffn',
+            'add',
+            'norm',
+            'identity',
+            'spconv',
+            'add',
+            'norm',
+            'identity',
+            'ffn',
+            'add',
+            'norm',
+            'refine',
+        ],
+        refine_layer=dict(
+            embed_dims=128,
+            include_opa=True,
+            pc_range=[
+                -50.0,
+                -50.0,
+                -5.0,
+                50.0,
+                50.0,
+                3.0,
+            ],
+            phi_activation='loop',
+            refine_manual=None,
+            restrict_xyz=False,
+            scale_range=[
+                0.01,
+                3.2,
+            ],
+            semantic_dim=17,
+            semantics=True,
+            semantics_activation='identity',
+            type='SparseGaussian3DRefinementModuleV2',
+            unit_xyz=[
+                4.0,
+                4.0,
+                1.0,
+            ],
+            xyz_coordinate='cartesian'),
+        spconv_layer=dict(
+            embed_channels=128,
+            grid_size=[
+                1.0,
+                1.0,
+                1.0,
+            ],
+            in_channels=128,
+            pc_range=[
+                -50.0,
+                -50.0,
+                -5.0,
+                50.0,
+                50.0,
+                3.0,
+            ],
+            phi_activation='sigmoid',
+            type='SparseConv3D',
+            use_multi_layer=True,
+            use_out_proj=True,
+            xyz_coordinate='cartesian'),
+        type='GaussianOccEncoder'),
+    freeze_lifter=False,
+    head=dict(
+        apply_loss_type='random_1',
+        combine_geosem=True,
+        cuda_kwargs=dict(
+            D=16,
+            H=200,
+            W=200,
+            grid_size=0.5,
+            pc_min=[
+                -50.0,
+                -50.0,
+                -5.0,
+            ],
+            scale_multiplier=4),
+        empty_args=dict(mean=[
+            0,
+            0,
+            -1.0,
+        ], scale=[
+            100,
+            100,
+            8.0,
+        ]),
+        num_classes=18,
+        type='GaussianHead',
+        use_localaggprob=True,
+        use_localaggprob_fast=False,
+        with_empty=False),
+    img_backbone=dict(
+        dcn=dict(deform_groups=1, fallback_on_stride=False, type='DCNv2'),
+        depth=101,
+        frozen_stages=1,
+        norm_cfg=dict(requires_grad=False, type='BN2d'),
+        norm_eval=True,
+        num_stages=4,
+        out_indices=(
+            0,
+            1,
+            2,
+            3,
+        ),
+        stage_with_dcn=(
+            False,
+            False,
+            True,
+            True,
+        ),
+        style='caffe',
+        type='ResNet',
+        with_cp=True),
+    img_backbone_out_indices=[
+        0,
+        1,
+        2,
+        3,
+    ],
+    img_neck=dict(
+        add_extra_convs='on_output',
+        in_channels=[
+            256,
+            512,
+            1024,
+            2048,
+        ],
+        num_outs=4,
+        out_channels=128,
+        relu_before_extra_convs=True,
+        start_level=1,
+        type='FPN'),
+    lifter=dict(
+        anchor_grad=False,
+        anchors_per_pixel=1,
+        deterministic=False,
+        embed_dims=128,
+        feat_grad=False,
+        include_opa=True,
+        initializer=dict(
+            img_backbone_config=dict(
+                dcn=dict(
+                    deform_groups=1, fallback_on_stride=False, type='DCNv2'),
+                depth=101,
+                frozen_stages=1,
+                norm_cfg=dict(requires_grad=False, type='BN2d'),
+                norm_eval=True,
+                num_stages=4,
+                out_indices=(
+                    0,
+                    1,
+                    2,
+                    3,
+                ),
+                stage_with_dcn=(
+                    False,
+                    False,
+                    True,
+                    True,
+                ),
+                style='caffe',
+                type='ResNet',
+                with_cp=True),
+            img_backbone_out_indices=[
+                0,
+                1,
+                2,
+                3,
+            ],
+            neck_confifg=dict(
+                in_channels=[
+                    256,
+                    512,
+                    1024,
+                    2048,
+                ],
+                out_channels=[
+                    128,
+                    128,
+                    128,
+                    128,
+                ],
+                type='SECONDFPN',
+                upsample_strides=[
+                    0.5,
+                    1,
+                    2,
+                    4,
+                ]),
+            type='ResNetSecondFPN'),
+        initializer_img_downsample=None,
+        num_anchor=4000,
+        num_samples=128,
+        phi_activation='loop',
+        pretrained_path=None,
+        projection_in=None,
+        random_samples=2400,
+        random_sampling=False,
+        semantic_dim=17,
+        semantics=True,
+        type='GaussianLifterV2'),
+    type='BEVSegmentor')
+num_decoder = 4
+num_groups = 4
+num_levels = 4
+num_single_frame_decoder = 1
+occ_path = 'data/surroundocc/samples'
+optimizer = dict(
+    optimizer=dict(lr=0.0004, type='AdamW', weight_decay=0.01),
+    paramwise_cfg=dict(custom_keys=dict(img_backbone=dict(lr_mult=0.1))))
+pc_range = [
+    -50.0,
+    -50.0,
+    -5.0,
+    50.0,
+    50.0,
+    3.0,
+]
+phi_activation = 'sigmoid'
+print_freq = 50
+scale_range = [
+    0.01,
+    3.2,
+]
+semantic_dim = 17
+semantics = True
+test_pipeline = [
+    dict(to_float32=True, type='LoadMultiViewImageFromFiles'),
+    dict(
+        occ_path='data/surroundocc/samples',
+        semantic=True,
+        type='LoadOccupancySurroundOcc',
+        use_ego=False),
+    dict(type='ResizeCropFlipImage'),
+    dict(
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        to_rgb=True,
+        type='NormalizeMultiviewImage'),
+    dict(type='DefaultFormatBundle'),
+    dict(num_cams=6, type='NuScenesAdaptor', use_ego=False),
+]
+train_dataset_config = dict(
+    data_aug_conf=dict(
+        H=900,
+        W=1600,
+        bot_pct_lim=(
+            0.0,
+            0.0,
+        ),
+        final_dim=(
+            864,
+            1600,
+        ),
+        rand_flip=True,
+        resize_lim=(
+            1.0,
+            1.0,
+        ),
+        rot_lim=(
+            0.0,
+            0.0,
+        )),
+    data_root='data/nuscenes/',
+    imageset='data/nuscenes_cam/nuscenes_infos_train_sweeps_occ.pkl',
+    phase='train',
+    pipeline=[
+        dict(to_float32=True, type='LoadMultiViewImageFromFiles'),
+        dict(
+            occ_path='data/surroundocc/samples',
+            semantic=True,
+            type='LoadOccupancySurroundOcc',
+            use_ego=False),
+        dict(type='ResizeCropFlipImage'),
+        dict(type='PhotoMetricDistortionMultiViewImage'),
+        dict(
+            mean=[
+                123.675,
+                116.28,
+                103.53,
+            ],
+            std=[
+                58.395,
+                57.12,
+                57.375,
+            ],
+            to_rgb=True,
+            type='NormalizeMultiviewImage'),
+        dict(type='DefaultFormatBundle'),
+        dict(num_cams=6, type='NuScenesAdaptor', use_ego=False),
+    ],
+    type='NuScenesDataset')
+train_loader = dict(
+    batch_size=1,
+    num_workers=1,
+    persistent_workers=False,
+    pin_memory=False,
+    prefetch_factor=1,
+    shuffle=True)
+train_pipeline = [
+    dict(to_float32=True, type='LoadMultiViewImageFromFiles'),
+    dict(
+        occ_path='data/surroundocc/samples',
+        semantic=True,
+        type='LoadOccupancySurroundOcc',
+        use_ego=False),
+    dict(type='ResizeCropFlipImage'),
+    dict(type='PhotoMetricDistortionMultiViewImage'),
+    dict(
+        mean=[
+            123.675,
+            116.28,
+            103.53,
+        ],
+        std=[
+            58.395,
+            57.12,
+            57.375,
+        ],
+        to_rgb=True,
+        type='NormalizeMultiviewImage'),
+    dict(type='DefaultFormatBundle'),
+    dict(num_cams=6, type='NuScenesAdaptor', use_ego=False),
+]
+use_deformable_func = True
+val_dataset_config = dict(
+    data_aug_conf=dict(
+        H=900,
+        W=1600,
+        bot_pct_lim=(
+            0.0,
+            0.0,
+        ),
+        final_dim=(
+            864,
+            1600,
+        ),
+        rand_flip=True,
+        resize_lim=(
+            1.0,
+            1.0,
+        ),
+        rot_lim=(
+            0.0,
+            0.0,
+        )),
+    data_root='data/nuscenes/',
+    imageset='data/nuscenes_cam/nuscenes_infos_val_sweeps_occ.pkl',
+    phase='val',
+    pipeline=[
+        dict(to_float32=True, type='LoadMultiViewImageFromFiles'),
+        dict(
+            occ_path='data/surroundocc/samples',
+            semantic=True,
+            type='LoadOccupancySurroundOcc',
+            use_ego=False),
+        dict(type='ResizeCropFlipImage'),
+        dict(
+            mean=[
+                123.675,
+                116.28,
+                103.53,
+            ],
+            std=[
+                58.395,
+                57.12,
+                57.375,
+            ],
+            to_rgb=True,
+            type='NormalizeMultiviewImage'),
+        dict(type='DefaultFormatBundle'),
+        dict(num_cams=6, type='NuScenesAdaptor', use_ego=False),
+    ],
+    type='NuScenesDataset')
+val_loader = dict(
+    batch_size=1,
+    num_workers=1,
+    persistent_workers=False,
+    pin_memory=False,
+    prefetch_factor=1,
+    shuffle=False)
+work_dir = '/home/ivlab3/GaussianFormer/out/prob/gfv2_6400_many_npy'
+xyz_coordinate = 'cartesian'
+
+2025/12/03 22:37:18 - mmengine - INFO - dump BEV pseudo labels to: ./pseudo_bev/val_1203
+Name of parameter - Initialization information
+
+img_backbone.conv1.weight - torch.Size([64, 3, 7, 7]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.bn1.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.bn1.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.0.conv1.weight - torch.Size([64, 64, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer1.0.bn1.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.0.bn1.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.0.conv2.weight - torch.Size([64, 64, 3, 3]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer1.0.bn2.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.0.bn2.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.0.conv3.weight - torch.Size([256, 64, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer1.0.bn3.weight - torch.Size([256]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer1.0.bn3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.0.downsample.0.weight - torch.Size([256, 64, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer1.0.downsample.1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.0.downsample.1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.1.conv1.weight - torch.Size([64, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer1.1.bn1.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.1.bn1.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.1.conv2.weight - torch.Size([64, 64, 3, 3]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer1.1.bn2.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.1.bn2.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.1.conv3.weight - torch.Size([256, 64, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer1.1.bn3.weight - torch.Size([256]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer1.1.bn3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.2.conv1.weight - torch.Size([64, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer1.2.bn1.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.2.bn1.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.2.conv2.weight - torch.Size([64, 64, 3, 3]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer1.2.bn2.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.2.bn2.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer1.2.conv3.weight - torch.Size([256, 64, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer1.2.bn3.weight - torch.Size([256]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer1.2.bn3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.0.conv1.weight - torch.Size([128, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer2.0.bn1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.0.bn1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.0.conv2.weight - torch.Size([128, 128, 3, 3]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer2.0.bn2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.0.bn2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.0.conv3.weight - torch.Size([512, 128, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer2.0.bn3.weight - torch.Size([512]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer2.0.bn3.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.0.downsample.0.weight - torch.Size([512, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer2.0.downsample.1.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.0.downsample.1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.1.conv1.weight - torch.Size([128, 512, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer2.1.bn1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.1.bn1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.1.conv2.weight - torch.Size([128, 128, 3, 3]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer2.1.bn2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.1.bn2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.1.conv3.weight - torch.Size([512, 128, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer2.1.bn3.weight - torch.Size([512]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer2.1.bn3.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.2.conv1.weight - torch.Size([128, 512, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer2.2.bn1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.2.bn1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.2.conv2.weight - torch.Size([128, 128, 3, 3]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer2.2.bn2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.2.bn2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.2.conv3.weight - torch.Size([512, 128, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer2.2.bn3.weight - torch.Size([512]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer2.2.bn3.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.3.conv1.weight - torch.Size([128, 512, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer2.3.bn1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.3.bn1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.3.conv2.weight - torch.Size([128, 128, 3, 3]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer2.3.bn2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.3.bn2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer2.3.conv3.weight - torch.Size([512, 128, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer2.3.bn3.weight - torch.Size([512]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer2.3.bn3.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.0.conv1.weight - torch.Size([256, 512, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.0.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.0.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.0.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.0.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.0.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.0.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.0.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.0.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.0.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.0.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.0.downsample.0.weight - torch.Size([1024, 512, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.0.downsample.1.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.0.downsample.1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.1.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.1.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.1.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.1.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.1.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.1.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.1.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.1.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.1.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.1.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.1.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.2.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.2.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.2.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.2.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.2.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.2.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.2.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.2.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.2.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.2.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.2.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.3.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.3.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.3.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.3.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.3.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.3.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.3.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.3.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.3.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.3.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.3.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.4.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.4.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.4.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.4.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.4.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.4.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.4.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.4.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.4.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.4.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.4.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.5.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.5.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.5.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.5.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.5.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.5.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.5.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.5.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.5.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.5.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.5.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.6.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.6.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.6.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.6.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.6.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.6.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.6.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.6.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.6.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.6.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.6.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.7.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.7.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.7.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.7.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.7.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.7.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.7.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.7.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.7.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.7.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.7.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.8.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.8.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.8.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.8.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.8.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.8.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.8.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.8.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.8.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.8.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.8.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.9.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.9.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.9.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.9.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.9.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.9.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.9.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.9.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.9.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.9.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.9.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.10.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.10.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.10.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.10.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.10.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.10.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.10.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.10.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.10.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.10.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.10.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.11.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.11.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.11.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.11.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.11.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.11.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.11.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.11.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.11.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.11.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.11.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.12.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.12.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.12.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.12.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.12.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.12.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.12.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.12.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.12.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.12.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.12.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.13.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.13.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.13.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.13.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.13.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.13.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.13.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.13.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.13.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.13.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.13.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.14.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.14.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.14.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.14.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.14.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.14.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.14.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.14.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.14.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.14.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.14.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.15.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.15.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.15.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.15.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.15.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.15.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.15.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.15.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.15.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.15.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.15.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.16.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.16.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.16.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.16.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.16.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.16.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.16.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.16.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.16.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.16.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.16.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.17.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.17.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.17.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.17.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.17.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.17.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.17.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.17.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.17.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.17.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.17.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.18.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.18.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.18.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.18.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.18.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.18.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.18.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.18.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.18.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.18.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.18.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.19.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.19.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.19.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.19.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.19.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.19.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.19.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.19.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.19.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.19.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.19.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.20.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.20.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.20.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.20.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.20.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.20.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.20.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.20.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.20.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.20.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.20.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.21.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.21.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.21.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.21.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.21.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.21.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.21.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.21.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.21.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.21.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.21.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.22.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.22.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.22.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.22.conv2.weight - torch.Size([256, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.22.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer3.22.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.22.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.22.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer3.22.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer3.22.bn3.weight - torch.Size([1024]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer3.22.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.0.conv1.weight - torch.Size([512, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer4.0.bn1.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.0.bn1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.0.conv2.weight - torch.Size([512, 512, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer4.0.conv2.conv_offset.weight - torch.Size([27, 512, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer4.0.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.0.bn2.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.0.bn2.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.0.conv3.weight - torch.Size([2048, 512, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer4.0.bn3.weight - torch.Size([2048]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer4.0.bn3.bias - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.0.downsample.0.weight - torch.Size([2048, 1024, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer4.0.downsample.1.weight - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.0.downsample.1.bias - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.1.conv1.weight - torch.Size([512, 2048, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer4.1.bn1.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.1.bn1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.1.conv2.weight - torch.Size([512, 512, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer4.1.conv2.conv_offset.weight - torch.Size([27, 512, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer4.1.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.1.bn2.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.1.bn2.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.1.conv3.weight - torch.Size([2048, 512, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer4.1.bn3.weight - torch.Size([2048]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer4.1.bn3.bias - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.2.conv1.weight - torch.Size([512, 2048, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer4.2.bn1.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.2.bn1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.2.conv2.weight - torch.Size([512, 512, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer4.2.conv2.conv_offset.weight - torch.Size([27, 512, 3, 3]): 
+Initialized by user-defined `init_weights` in ModulatedDeformConv2dPack  
+
+img_backbone.layer4.2.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.2.bn2.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.2.bn2.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_backbone.layer4.2.conv3.weight - torch.Size([2048, 512, 1, 1]): 
+KaimingInit: a=0, mode=fan_out, nonlinearity=relu, distribution =normal, bias=0 
+
+img_backbone.layer4.2.bn3.weight - torch.Size([2048]): 
+ConstantInit: val=0, bias=0 
+
+img_backbone.layer4.2.bn3.bias - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_neck.lateral_convs.0.conv.weight - torch.Size([128, 512, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+img_neck.lateral_convs.0.conv.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_neck.lateral_convs.1.conv.weight - torch.Size([128, 1024, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+img_neck.lateral_convs.1.conv.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_neck.lateral_convs.2.conv.weight - torch.Size([128, 2048, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+img_neck.lateral_convs.2.conv.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_neck.fpn_convs.0.conv.weight - torch.Size([128, 128, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+img_neck.fpn_convs.0.conv.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_neck.fpn_convs.1.conv.weight - torch.Size([128, 128, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+img_neck.fpn_convs.1.conv.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_neck.fpn_convs.2.conv.weight - torch.Size([128, 128, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+img_neck.fpn_convs.2.conv.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+img_neck.fpn_convs.3.conv.weight - torch.Size([128, 128, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+img_neck.fpn_convs.3.conv.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.random_anchors - torch.Size([2400, 28]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.anchor - torch.Size([4000, 25]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.instance_feature - torch.Size([6400, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.projection.1.weight - torch.Size([129, 512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.projection.1.bias - torch.Size([129]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.conv1.weight - torch.Size([64, 3, 7, 7]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.bn1.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.bn1.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.0.conv1.weight - torch.Size([64, 64, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.0.bn1.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.0.bn1.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.0.conv2.weight - torch.Size([64, 64, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.0.bn2.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.0.bn2.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.0.conv3.weight - torch.Size([256, 64, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.0.bn3.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.0.bn3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.0.downsample.0.weight - torch.Size([256, 64, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.0.downsample.1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.0.downsample.1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.1.conv1.weight - torch.Size([64, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.1.bn1.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.1.bn1.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.1.conv2.weight - torch.Size([64, 64, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.1.bn2.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.1.bn2.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.1.conv3.weight - torch.Size([256, 64, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.1.bn3.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.1.bn3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.2.conv1.weight - torch.Size([64, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.2.bn1.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.2.bn1.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.2.conv2.weight - torch.Size([64, 64, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.2.bn2.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.2.bn2.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.2.conv3.weight - torch.Size([256, 64, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.2.bn3.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer1.2.bn3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.0.conv1.weight - torch.Size([128, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.0.bn1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.0.bn1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.0.conv2.weight - torch.Size([128, 128, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.0.bn2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.0.bn2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.0.conv3.weight - torch.Size([512, 128, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.0.bn3.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.0.bn3.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.0.downsample.0.weight - torch.Size([512, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.0.downsample.1.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.0.downsample.1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.1.conv1.weight - torch.Size([128, 512, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.1.bn1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.1.bn1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.1.conv2.weight - torch.Size([128, 128, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.1.bn2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.1.bn2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.1.conv3.weight - torch.Size([512, 128, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.1.bn3.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.1.bn3.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.2.conv1.weight - torch.Size([128, 512, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.2.bn1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.2.bn1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.2.conv2.weight - torch.Size([128, 128, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.2.bn2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.2.bn2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.2.conv3.weight - torch.Size([512, 128, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.2.bn3.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.2.bn3.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.3.conv1.weight - torch.Size([128, 512, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.3.bn1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.3.bn1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.3.conv2.weight - torch.Size([128, 128, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.3.bn2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.3.bn2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.3.conv3.weight - torch.Size([512, 128, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.3.bn3.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer2.3.bn3.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.0.conv1.weight - torch.Size([256, 512, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.0.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.0.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.0.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.0.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.0.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.0.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.0.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.0.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.0.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.0.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.0.downsample.0.weight - torch.Size([1024, 512, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.0.downsample.1.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.0.downsample.1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.1.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.1.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.1.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.1.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.1.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.1.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.1.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.1.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.1.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.1.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.1.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.2.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.2.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.2.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.2.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.2.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.2.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.2.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.2.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.2.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.2.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.2.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.3.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.3.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.3.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.3.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.3.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.3.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.3.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.3.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.3.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.3.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.3.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.4.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.4.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.4.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.4.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.4.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.4.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.4.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.4.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.4.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.4.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.4.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.5.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.5.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.5.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.5.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.5.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.5.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.5.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.5.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.5.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.5.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.5.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.6.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.6.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.6.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.6.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.6.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.6.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.6.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.6.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.6.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.6.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.6.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.7.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.7.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.7.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.7.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.7.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.7.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.7.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.7.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.7.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.7.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.7.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.8.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.8.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.8.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.8.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.8.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.8.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.8.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.8.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.8.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.8.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.8.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.9.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.9.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.9.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.9.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.9.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.9.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.9.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.9.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.9.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.9.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.9.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.10.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.10.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.10.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.10.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.10.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.10.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.10.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.10.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.10.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.10.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.10.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.11.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.11.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.11.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.11.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.11.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.11.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.11.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.11.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.11.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.11.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.11.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.12.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.12.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.12.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.12.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.12.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.12.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.12.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.12.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.12.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.12.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.12.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.13.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.13.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.13.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.13.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.13.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.13.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.13.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.13.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.13.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.13.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.13.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.14.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.14.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.14.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.14.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.14.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.14.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.14.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.14.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.14.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.14.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.14.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.15.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.15.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.15.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.15.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.15.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.15.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.15.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.15.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.15.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.15.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.15.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.16.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.16.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.16.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.16.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.16.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.16.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.16.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.16.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.16.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.16.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.16.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.17.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.17.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.17.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.17.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.17.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.17.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.17.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.17.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.17.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.17.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.17.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.18.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.18.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.18.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.18.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.18.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.18.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.18.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.18.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.18.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.18.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.18.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.19.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.19.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.19.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.19.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.19.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.19.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.19.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.19.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.19.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.19.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.19.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.20.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.20.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.20.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.20.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.20.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.20.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.20.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.20.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.20.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.20.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.20.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.21.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.21.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.21.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.21.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.21.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.21.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.21.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.21.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.21.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.21.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.21.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.22.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.22.bn1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.22.bn1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.22.conv2.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.22.conv2.conv_offset.weight - torch.Size([27, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.22.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.22.bn2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.22.bn2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.22.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.22.bn3.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer3.22.bn3.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.0.conv1.weight - torch.Size([512, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.0.bn1.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.0.bn1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.0.conv2.weight - torch.Size([512, 512, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.0.conv2.conv_offset.weight - torch.Size([27, 512, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.0.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.0.bn2.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.0.bn2.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.0.conv3.weight - torch.Size([2048, 512, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.0.bn3.weight - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.0.bn3.bias - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.0.downsample.0.weight - torch.Size([2048, 1024, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.0.downsample.1.weight - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.0.downsample.1.bias - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.1.conv1.weight - torch.Size([512, 2048, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.1.bn1.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.1.bn1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.1.conv2.weight - torch.Size([512, 512, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.1.conv2.conv_offset.weight - torch.Size([27, 512, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.1.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.1.bn2.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.1.bn2.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.1.conv3.weight - torch.Size([2048, 512, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.1.bn3.weight - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.1.bn3.bias - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.2.conv1.weight - torch.Size([512, 2048, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.2.bn1.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.2.bn1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.2.conv2.weight - torch.Size([512, 512, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.2.conv2.conv_offset.weight - torch.Size([27, 512, 3, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.2.conv2.conv_offset.bias - torch.Size([27]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.2.bn2.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.2.bn2.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.2.conv3.weight - torch.Size([2048, 512, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.2.bn3.weight - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_backbone.layer4.2.bn3.bias - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_neck.deblocks.0.0.weight - torch.Size([128, 256, 2, 2]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_neck.deblocks.0.1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_neck.deblocks.0.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_neck.deblocks.1.0.weight - torch.Size([512, 128, 1, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_neck.deblocks.1.1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_neck.deblocks.1.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_neck.deblocks.2.0.weight - torch.Size([1024, 128, 2, 2]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_neck.deblocks.2.1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_neck.deblocks.2.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_neck.deblocks.3.0.weight - torch.Size([2048, 128, 4, 4]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_neck.deblocks.3.1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+lifter.initialize_backbone.img_neck.deblocks.3.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.xyz_fc.0.weight - torch.Size([128, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.xyz_fc.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.xyz_fc.2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.xyz_fc.2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.xyz_fc.3.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.xyz_fc.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.xyz_fc.5.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.xyz_fc.5.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.scale_fc.0.weight - torch.Size([128, 3]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.scale_fc.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.scale_fc.2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.scale_fc.2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.scale_fc.3.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.scale_fc.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.scale_fc.5.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.scale_fc.5.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.rot_fc.0.weight - torch.Size([128, 4]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.rot_fc.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.rot_fc.2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.rot_fc.2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.rot_fc.3.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.rot_fc.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.rot_fc.5.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.rot_fc.5.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.opacity_fc.0.weight - torch.Size([128, 1]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.opacity_fc.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.opacity_fc.2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.opacity_fc.2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.opacity_fc.3.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.opacity_fc.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.opacity_fc.5.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.opacity_fc.5.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.semantics_fc.0.weight - torch.Size([128, 17]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.semantics_fc.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.semantics_fc.2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.semantics_fc.2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.semantics_fc.3.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.semantics_fc.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.semantics_fc.5.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.semantics_fc.5.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.output_fc.0.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.output_fc.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.output_fc.2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.output_fc.2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.output_fc.3.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.output_fc.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.output_fc.5.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.anchor_encoder.output_fc.5.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.1.kps_generator.learnable_fc.weight - torch.Size([18, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.1.kps_generator.learnable_fc.bias - torch.Size([18]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.1.output_proj.weight - torch.Size([128, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.1.output_proj.bias - torch.Size([128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.1.camera_encoder.0.weight - torch.Size([128, 12]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.1.camera_encoder.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.1.camera_encoder.2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.1.camera_encoder.2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.1.camera_encoder.3.weight - torch.Size([128, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.1.camera_encoder.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.1.camera_encoder.5.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.1.camera_encoder.5.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.1.weights_fc.weight - torch.Size([208, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.1.weights_fc.bias - torch.Size([208]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.3.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.5.layers.0.0.weight - torch.Size([512, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.5.layers.0.0.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.5.layers.1.weight - torch.Size([128, 512]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.5.layers.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.7.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.7.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.9.layer.0.weight - torch.Size([128, 5, 5, 5, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.9.layer.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.9.layer.1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.9.layer.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.9.layer.3.weight - torch.Size([128, 5, 5, 5, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.9.layer.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.9.layer.4.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.9.layer.4.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.9.layer.6.weight - torch.Size([128, 5, 5, 5, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.9.layer.6.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.9.layer.7.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.9.layer.7.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.9.output_proj.weight - torch.Size([128, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.9.output_proj.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.11.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.11.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.13.layers.0.0.weight - torch.Size([512, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.13.layers.0.0.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.13.layers.1.weight - torch.Size([128, 512]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.13.layers.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.15.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.15.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.16.layers.0.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.16.layers.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.16.layers.2.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.16.layers.2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.16.layers.4.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.16.layers.4.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.16.layers.5.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.16.layers.5.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.16.layers.7.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.16.layers.7.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.16.layers.9.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.16.layers.9.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.16.layers.10.weight - torch.Size([28, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.16.layers.10.bias - torch.Size([28]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.16.layers.11.scale - torch.Size([28]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.18.kps_generator.learnable_fc.weight - torch.Size([18, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.18.kps_generator.learnable_fc.bias - torch.Size([18]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.18.output_proj.weight - torch.Size([128, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.18.output_proj.bias - torch.Size([128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.18.camera_encoder.0.weight - torch.Size([128, 12]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.18.camera_encoder.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.18.camera_encoder.2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.18.camera_encoder.2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.18.camera_encoder.3.weight - torch.Size([128, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.18.camera_encoder.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.18.camera_encoder.5.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.18.camera_encoder.5.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.18.weights_fc.weight - torch.Size([208, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.18.weights_fc.bias - torch.Size([208]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.20.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.20.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.22.layers.0.0.weight - torch.Size([512, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.22.layers.0.0.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.22.layers.1.weight - torch.Size([128, 512]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.22.layers.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.24.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.24.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.26.layer.0.weight - torch.Size([128, 5, 5, 5, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.26.layer.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.26.layer.1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.26.layer.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.26.layer.3.weight - torch.Size([128, 5, 5, 5, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.26.layer.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.26.layer.4.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.26.layer.4.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.26.layer.6.weight - torch.Size([128, 5, 5, 5, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.26.layer.6.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.26.layer.7.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.26.layer.7.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.26.output_proj.weight - torch.Size([128, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.26.output_proj.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.28.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.28.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.30.layers.0.0.weight - torch.Size([512, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.30.layers.0.0.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.30.layers.1.weight - torch.Size([128, 512]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.30.layers.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.32.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.32.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.33.layers.0.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.33.layers.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.33.layers.2.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.33.layers.2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.33.layers.4.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.33.layers.4.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.33.layers.5.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.33.layers.5.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.33.layers.7.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.33.layers.7.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.33.layers.9.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.33.layers.9.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.33.layers.10.weight - torch.Size([28, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.33.layers.10.bias - torch.Size([28]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.33.layers.11.scale - torch.Size([28]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.35.kps_generator.learnable_fc.weight - torch.Size([18, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.35.kps_generator.learnable_fc.bias - torch.Size([18]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.35.output_proj.weight - torch.Size([128, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.35.output_proj.bias - torch.Size([128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.35.camera_encoder.0.weight - torch.Size([128, 12]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.35.camera_encoder.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.35.camera_encoder.2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.35.camera_encoder.2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.35.camera_encoder.3.weight - torch.Size([128, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.35.camera_encoder.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.35.camera_encoder.5.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.35.camera_encoder.5.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.35.weights_fc.weight - torch.Size([208, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.35.weights_fc.bias - torch.Size([208]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.37.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.37.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.39.layers.0.0.weight - torch.Size([512, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.39.layers.0.0.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.39.layers.1.weight - torch.Size([128, 512]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.39.layers.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.41.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.41.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.43.layer.0.weight - torch.Size([128, 5, 5, 5, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.43.layer.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.43.layer.1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.43.layer.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.43.layer.3.weight - torch.Size([128, 5, 5, 5, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.43.layer.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.43.layer.4.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.43.layer.4.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.43.layer.6.weight - torch.Size([128, 5, 5, 5, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.43.layer.6.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.43.layer.7.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.43.layer.7.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.43.output_proj.weight - torch.Size([128, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.43.output_proj.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.45.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.45.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.47.layers.0.0.weight - torch.Size([512, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.47.layers.0.0.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.47.layers.1.weight - torch.Size([128, 512]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.47.layers.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.49.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.49.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.50.layers.0.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.50.layers.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.50.layers.2.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.50.layers.2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.50.layers.4.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.50.layers.4.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.50.layers.5.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.50.layers.5.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.50.layers.7.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.50.layers.7.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.50.layers.9.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.50.layers.9.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.50.layers.10.weight - torch.Size([28, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.50.layers.10.bias - torch.Size([28]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.50.layers.11.scale - torch.Size([28]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.52.kps_generator.learnable_fc.weight - torch.Size([18, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.52.kps_generator.learnable_fc.bias - torch.Size([18]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.52.output_proj.weight - torch.Size([128, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.52.output_proj.bias - torch.Size([128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.52.camera_encoder.0.weight - torch.Size([128, 12]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.52.camera_encoder.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.52.camera_encoder.2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.52.camera_encoder.2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.52.camera_encoder.3.weight - torch.Size([128, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.52.camera_encoder.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.52.camera_encoder.5.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.52.camera_encoder.5.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.52.weights_fc.weight - torch.Size([208, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.52.weights_fc.bias - torch.Size([208]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.54.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.54.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.56.layers.0.0.weight - torch.Size([512, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.56.layers.0.0.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.56.layers.1.weight - torch.Size([128, 512]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.56.layers.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.58.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.58.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.60.layer.0.weight - torch.Size([128, 5, 5, 5, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.60.layer.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.60.layer.1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.60.layer.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.60.layer.3.weight - torch.Size([128, 5, 5, 5, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.60.layer.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.60.layer.4.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.60.layer.4.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.60.layer.6.weight - torch.Size([128, 5, 5, 5, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.60.layer.6.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.60.layer.7.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.60.layer.7.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.60.output_proj.weight - torch.Size([128, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.60.output_proj.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.62.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.62.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.64.layers.0.0.weight - torch.Size([512, 128]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.64.layers.0.0.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.64.layers.1.weight - torch.Size([128, 512]): 
+Initialized by user-defined `init_weights` in GaussianOccEncoder  
+
+encoder.layers.64.layers.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.66.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.66.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.67.layers.0.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.67.layers.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.67.layers.2.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.67.layers.2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.67.layers.4.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.67.layers.4.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.67.layers.5.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.67.layers.5.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.67.layers.7.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.67.layers.7.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.67.layers.9.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.67.layers.9.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.67.layers.10.weight - torch.Size([28, 128]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.67.layers.10.bias - torch.Size([28]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+
+encoder.layers.67.layers.11.scale - torch.Size([28]): 
+The value is the same before and after calling `init_weights` of BEVSegmentor  
+2025/12/03 22:37:22 - mmengine - INFO - Number of params: 120418917
+2025/12/03 22:37:22 - mmengine - INFO - done ddp model

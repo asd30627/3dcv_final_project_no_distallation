@@ -1,0 +1,76 @@
+cd GaussianFormer
+mkdir -p data
+ln -s /mnt/xs1000/data/nuscenes/ data/nuscenes
+ln -s /mnt/xs1000/data/nuscenes_cam/ data/nuscenes_cam
+ln -s /mnt/xs1000/data/surroundocc/ data/surroundocc # For GaussianFormer
+ln -s /mnt/xs1000/data/surroundocc/samples/ data/surroundocc # For GaussianWorld, not the same as structure in GitHub 
+
+# 確認連結成功
+ls -l data
+# output should be: nuscenes -> /media/ivlab3/YTSSD/data/nuscenes/
+# For removal:
+rm data/nuscenes
+rm data/nuscenes_cam
+rm data/surroundocc
+
+python train.py --py-config config/nuscenes_gs144000.py --work-dir out/xxxx
+
+python train.py --py-config config/prob/nuscenes_gs6400_switch.py --work-dir out/prob/v2_6400_switch
+
+# Validation (Github ver.)
+python eval_original.py --py-config config/prob/nuscenes_gs6400.py --work-dir /home/ivlab3/GaussianFormer/out/prob/validation --resume-from /home/ivlab3/GaussianFormer/out/prob/v2_6400_state_dict.pth
+
+python visualize.py --py-config config/prob/nuscenes_gs6400.py --work-dir out/prob/vis_1204 --resume-from /home/ivlab3/GaussianFormer/out/prob/state_dict.pth --vis-occ --vis-gaussian --num-samples 100 --model-type base
+
+
+
+
+# Validation 1: Only .npy files
+python eval.py \
+  --py-config config/prob/nuscenes_gs6400.py \
+  --work-dir /home/ivlab3/GaussianFormer/out/prob/gfv2_6400_many_npy \
+  --resume-from /home/ivlab3/GaussianFormer/out/prob/v2_6400_state_dict.pth \
+  --dump-bev-dir ./pseudo_bev/val_1204 \
+  --dump-bev-vis-dir ./pseudo_bev/val_1204_vis
+
+
+# Validation 2: .npz files (3D prob or logits or onehot)
+python eval.py \
+  --py-config config/prob/nuscenes_gs6400.py \
+  --work-dir /home/ivlab3/GaussianFormer/out/prob/gfv2_6400_many_npy \
+  --resume-from /home/ivlab3/GaussianFormer/out/prob/v2_6400_state_dict.pth \
+  --dump-bev-dir ./pseudo_bev/val_1204 \
+  --dump-bev-vis-dir ./pseudo_bev/val_1204_vis \
+  --dump-3d-dir ./dump_3d_teacher \
+  --dump-3d-type hard_onehot \
+  --dump-3d-compress
+  
+# Note: Refer to https://chatgpt.com/g/g-p-692d60cf06bc8191b27dcde9d77db5c7-3dcv/c/693116a6-a4b0-8324-a5dd-241daa1765c5 then search for keyword "✅ 方案 A：先用「硬 one-hot」當蒸餾目標" for future updates.
+  
+# Checkers
+python check_bev_npy.py \
+  --bev-npy ./pseudo_bev/val_1204/000123_0_bev_sem.npy \
+  --out-png ./pseudo_bev/val_1204_vis/000123_bev_sem_vis.png \
+  --scale 4
+  
+python check_3d_npz.py \
+  --path /path/to/000123_3d_prob_fp16.npz \
+  --mode prob \
+  --out-bev-npy /path/to/000123_from_prob_bev.npy \
+  --out-bev-png /path/to/000123_from_prob_bev.png
+
+python check_3d_npz.py \
+  --path /path/to/000123_3d_logits_fp16.npz \
+  --mode logits \
+  --out-bev-npy /path/to/000123_from_logits_bev.npy \
+  --out-bev-png /path/to/000123_from_logits_bev.png
+
+python check_3d_npz.py \
+  --path xxx.npz \
+  --key my_tensor_name \
+  --mode prob
+
+
+
+nvidia-smi dmon -s pucvmet -d 1
+watch -n1 nvidia-smi

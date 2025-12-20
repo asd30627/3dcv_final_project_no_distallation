@@ -1,0 +1,6 @@
+# ninja log v7
+1	1679	1763354771765120042	/home/ivlab3/GaussianFormer/model/head/localagg_prob/build/temp.linux-x86_64-3.10/src/forward.o	2876a8b15a91d7d
+1	1681	1763354771764961572	/home/ivlab3/GaussianFormer/model/head/localagg_prob/build/temp.linux-x86_64-3.10/src/backward.o	9d7e9318cced5833
+0	7427	1763354771763138437	/home/ivlab3/GaussianFormer/model/head/localagg_prob/build/temp.linux-x86_64-3.10/ext.o	4148086886c6f5b2
+1	18113	1763354771764138447	/home/ivlab3/GaussianFormer/model/head/localagg_prob/build/temp.linux-x86_64-3.10/local_aggregate.o	6265704c4fa0b18c
+1	22641	1763354771764822800	/home/ivlab3/GaussianFormer/model/head/localagg_prob/build/temp.linux-x86_64-3.10/src/aggregator_impl.o	bccfb985dcc01dd0

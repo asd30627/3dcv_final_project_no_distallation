@@ -1,0 +1,10 @@
+# ninja log v7
+1	1602	1763371045124587324	/home/ivlab3/GaussianFormer/model/head/localagg_prob_fast/build/temp.linux-x86_64-cpython-39/src/forward.o	a362bbc62aedae02
+1	1638	1763371045124477804	/home/ivlab3/GaussianFormer/model/head/localagg_prob_fast/build/temp.linux-x86_64-cpython-39/src/backward.o	1b489afc83ac313b
+0	8945	1763371045122725269	/home/ivlab3/GaussianFormer/model/head/localagg_prob_fast/build/temp.linux-x86_64-cpython-39/ext.o	6c21ac0ab1e17dc9
+0	22303	1763371045124176547	/home/ivlab3/GaussianFormer/model/head/localagg_prob_fast/build/temp.linux-x86_64-cpython-39/local_aggregate.o	1cc808445b367145
+0	27055	1763371045124366630	/home/ivlab3/GaussianFormer/model/head/localagg_prob_fast/build/temp.linux-x86_64-cpython-39/src/aggregator_impl.o	4df65371471fb85f
+6	1599	1763385619715217128	/home/ivlab3/GaussianFormer/model/head/localagg_prob_fast/build/temp.linux-x86_64-cpython-39/src/forward.o	7e237f4639da28ef
+6	1621	1763385619715039535	/home/ivlab3/GaussianFormer/model/head/localagg_prob_fast/build/temp.linux-x86_64-cpython-39/src/backward.o	c279c59b80039d6f
+6	21845	1763385619714060205	/home/ivlab3/GaussianFormer/model/head/localagg_prob_fast/build/temp.linux-x86_64-cpython-39/local_aggregate.o	d25007a23e0bcee7
+6	26727	1763385619714834157	/home/ivlab3/GaussianFormer/model/head/localagg_prob_fast/build/temp.linux-x86_64-cpython-39/src/aggregator_impl.o	de324a2469f887b3

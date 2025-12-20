@@ -1,0 +1,10 @@
+work_dirs/
+dump_3d_teacher/
+npy_check_viz/
+spconv/
+pseudo_bev/
+vis/
+ckpts/
+*.pth
+*.pt
+*.ckpt
