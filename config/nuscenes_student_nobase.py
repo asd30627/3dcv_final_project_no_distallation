@@ -26,9 +26,10 @@ grad_max_norm = 35
 # -----------------------
 # data paths
 # -----------------------
-data_root = "data/nuscenes/"
-anno_root = "data/nuscenes_cam/"
-occ_path = "data/surroundocc/samples"
+data_root = "/mnt/xs1000/data/nuscenes/"
+anno_root = "/mnt/xs1000/data/nuscenes_cam/"
+occ_path  = "/mnt/xs1000/data/surroundocc/samples"
+
 
 # 你的模型輸入 (W,H) = (640,480)
 input_shape = (640, 480)

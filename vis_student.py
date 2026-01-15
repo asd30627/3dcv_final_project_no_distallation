@@ -266,3 +266,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+#python vis_student.py   --py-config ./config/nuscenes_student_nobase.py   --weights ./work_dirs/occ_student_nobase/epoch_10.pth   --viz-dir ./vis/0113
